@@ -32,7 +32,7 @@ export default async function HomePage() {
         <ProductRail
           eyebrow="Signature Collection"
           title="Shop Lumière Row"
-          description="Real products and live pricing."
+          description="Première édition"
           products={featuredProducts}
         />
       ) : null}

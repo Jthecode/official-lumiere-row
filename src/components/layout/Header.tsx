@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { readBag } from "@/lib/bag";
 
 const navLinks = [
   { href: "/#shop", label: "Shop" },
@@ -9,13 +13,35 @@ const navLinks = [
   { href: "/#about", label: "About" },
 ];
 
-const utilityLinks = [
-  { href: "/bag", label: "Bag" },
-];
-
 export default function Header() {
+  const [bagCount, setBagCount] = useState(0);
+
+  useEffect(() => {
+    const syncBagCount = () => {
+      const items = readBag();
+      const total = items.reduce((sum, item) => sum + item.quantity, 0);
+      setBagCount(total);
+    };
+
+    syncBagCount();
+
+    const handleBagUpdated: EventListener = () => syncBagCount();
+    const handleStorage = () => syncBagCount();
+    const handleFocus = () => syncBagCount();
+
+    window.addEventListener("bag:updated", handleBagUpdated);
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("bag:updated", handleBagUpdated);
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
+
   return (
-    <header className="sticky top-0 z-50 border-b border-[color:var(--border)] bg-[rgba(7,17,13,0.62)] backdrop-blur-2xl">
+    <header className="sticky top-0 z-50 border-b border-[color:var(--border)] bg-[rgba(12,4,5,0.68)] backdrop-blur-2xl">
       <div className="container">
         <div className="flex min-h-[108px] items-center justify-between gap-6">
           <Link
@@ -48,17 +74,21 @@ export default function Header() {
           </nav>
 
           <div className="hidden items-center gap-5 lg:flex">
-            {utilityLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)] transition hover:text-[color:var(--foreground)]"
-              >
-                {link.label}
-              </Link>
-            ))}
+            <Link
+              href="/bag"
+              className="inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)] transition hover:text-[color:var(--foreground)]"
+            >
+              <span>Bag</span>
+              <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full border border-[color:var(--border-strong)] bg-[rgba(29,10,13,0.9)] px-2 py-1 text-[10px] leading-none text-[color:var(--gold-soft)]">
+                {bagCount}
+              </span>
+            </Link>
 
-            <Link href="/#shop" scroll className="button-secondary min-h-[46px] px-5">
+            <Link
+              href="/#shop"
+              scroll
+              className="button-secondary min-h-[46px] px-5"
+            >
               Shop Now
             </Link>
           </div>
@@ -67,15 +97,18 @@ export default function Header() {
             <Link
               href="/bag"
               aria-label="Bag"
-              className="inline-flex h-11 min-w-[62px] items-center justify-center rounded-full border border-[color:var(--border-strong)] bg-[rgba(14,28,22,0.72)] px-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground)] transition hover:bg-[rgba(18,36,28,0.92)]"
+              className="inline-flex h-11 min-w-[74px] items-center justify-center gap-2 rounded-full border border-[color:var(--border-strong)] bg-[rgba(29,10,13,0.72)] px-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground)] transition hover:bg-[rgba(37,12,16,0.92)]"
             >
-              Bag
+              <span>Bag</span>
+              <span className="inline-flex min-w-[1.2rem] items-center justify-center rounded-full bg-[color:var(--gold-deep)] px-1.5 py-0.5 text-[10px] leading-none text-[color:var(--ivory)]">
+                {bagCount}
+              </span>
             </Link>
 
             <button
               type="button"
               aria-label="Open menu"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--border-strong)] bg-[rgba(14,28,22,0.72)] text-[color:var(--foreground)] transition hover:bg-[rgba(18,36,28,0.92)]"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--border-strong)] bg-[rgba(29,10,13,0.72)] text-[color:var(--foreground)] transition hover:bg-[rgba(37,12,16,0.92)]"
             >
               <span className="text-lg leading-none">☰</span>
             </button>
